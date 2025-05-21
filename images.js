@@ -10,7 +10,7 @@ async function loadImages(page) {
   loading = true;
 
   try {
-    const response = await fetch(`http://localhost:3000/images?page=${page}&limit=${imagesPerPage}`);
+    const response = await fetch(`https://xarchivesbackend.onrender.com/images?page=${page}&limit=${imagesPerPage}`);
     if (!response.ok) throw new Error('Failed to fetch images');
 
     const images = await response.json();
