@@ -1,9 +1,10 @@
 const scrollDiv = document.querySelector('.scroll');
-
 let currentPage = 1;
 const imagesPerPage = 30;
 let loading = false;
-let allLoaded = false; // flag to stop when no more images
+let allLoaded = false;
+let totalImagesLoaded = 0;
+let adInserted = false;
 
 async function loadImages(page) {
   if (loading || allLoaded) return;
@@ -21,7 +22,6 @@ async function loadImages(page) {
       return;
     }
 
-    // Load images one by one with a delay
     for (let i = 0; i < images.length; i++) {
       const url = images[i];
       const img = document.createElement('img');
@@ -29,7 +29,14 @@ async function loadImages(page) {
       img.loading = 'lazy';
       scrollDiv.appendChild(img);
 
-      // Delay (e.g., 100ms between each image)
+      totalImagesLoaded++;
+
+      // Show ad after 5 images
+      if (totalImagesLoaded === 5 && !adInserted) {
+        insertSkyscraperAd();
+        adInserted = true;
+      }
+
       await new Promise(resolve => setTimeout(resolve, 100));
     }
 
@@ -40,14 +47,45 @@ async function loadImages(page) {
   }
 }
 
+function insertSkyscraperAd() {
+  const adWrapper = document.createElement('div');
+  adWrapper.className = 'cbrnwc376579';
 
-// Detect when near right end of horizontal scroll
+  const adScriptInit = document.createElement('script');
+  adScriptInit.innerHTML = `
+    window.k_init = window.k_init || [];
+    k_init.push({
+      "id": "cbrnwc376579",
+      "type": "cu",
+      "domain": "hdbkell.com",
+      "next": "1",
+      "rerun": true,
+      "newtab": "1",
+      "exclude": "",
+      "include": "",
+      "delay": "1",
+      "batchSize": "1",
+      "batchInterval": "3",
+      "filterDevice": "both",
+      "blockedReferrers": ""
+    });
+  `;
+
+  const adScript = document.createElement('script');
+  adScript.setAttribute('async', true);
+  adScript.setAttribute('charset', 'utf-8');
+  adScript.setAttribute('data-cfasync', 'false');
+  adScript.src = 'https://hdbkell.com/70xpl.js';
+
+  scrollDiv.appendChild(adWrapper);
+  scrollDiv.appendChild(adScriptInit);
+  scrollDiv.appendChild(adScript);
+}
+
 scrollDiv.addEventListener('scroll', () => {
   if (allLoaded || loading) return;
 
-  // How close to the right edge to trigger loading more images (pixels)
   const threshold = 100;
-
   const { scrollLeft, scrollWidth, clientWidth } = scrollDiv;
   if (scrollLeft + clientWidth >= scrollWidth - threshold) {
     currentPage++;
@@ -55,5 +93,4 @@ scrollDiv.addEventListener('scroll', () => {
   }
 });
 
-// Initial load
 loadImages(currentPage);
